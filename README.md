@@ -3,8 +3,6 @@
 Spellcheck dictionary for programmers. A fork of [psliwka/vim-dirtytalk][upstream]
 that ships the compiled spell file directly, so you don't need a vim plugin.
 
-[upstream]: https://github.com/psliwka/vim-dirtytalk
-
 ## Use in (neo)vim
 
 ```sh
@@ -29,3 +27,5 @@ Requires `uv` and `nvim` (for `:mkspell!`).
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+[upstream]: https://github.com/psliwka/vim-dirtytalk

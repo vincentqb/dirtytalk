@@ -1,44 +1,44 @@
 repos:
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.2
-    hooks:
-      - id: codespell
-        additional_dependencies:
-          - tomli
-        exclude: ^(wordlists/|programming\.words$)
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
-    hooks:
-      - id: end-of-file-fixer
-        exclude: ^(wordlists/|programming\.words$|programming\.utf-8\.spl$)
-      - id: mixed-line-ending
-      - id: trailing-whitespace
-        exclude: ^(wordlists/|programming\.words$)
-      - id: check-toml
-  - repo: https://github.com/hukkin/mdformat
-    rev: 1.0.0
-    hooks:
-      - id: mdformat
-        additional_dependencies:
-          - mdformat-gfm
-          - mdformat-ruff
-          - ruff
-  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.16.0
-    hooks:
-      - id: pretty-format-toml
-        args: [--autofix]
-      - id: pretty-format-yaml
-        args: [--autofix]
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.12
-    hooks:
-      - id: ruff-check
-        types_or: [python, pyi]
-        args: [--fix]
-      - id: ruff-format
-        types_or: [python, pyi]
-  - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.11.12
-    hooks:
-      - id: uv-lock
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.4.2
+  hooks:
+  - id: codespell
+    additional_dependencies:
+    - tomli
+    exclude: ^(wordlists/|programming\.words$)
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v6.0.0
+  hooks:
+  - id: end-of-file-fixer
+    exclude: ^(wordlists/|programming\.words$|programming\.utf-8\.spl$)
+  - id: mixed-line-ending
+  - id: trailing-whitespace
+    exclude: ^(wordlists/|programming\.words$)
+  - id: check-toml
+- repo: https://github.com/hukkin/mdformat
+  rev: 1.0.0
+  hooks:
+  - id: mdformat
+    additional_dependencies:
+    - mdformat-gfm
+    - mdformat-ruff
+    - ruff
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v2.16.0
+  hooks:
+  - id: pretty-format-toml
+    args: [--autofix]
+  - id: pretty-format-yaml
+    args: [--autofix]
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.15.12
+  hooks:
+  - id: ruff-check
+    types_or: [python, pyi]
+    args: [--fix]
+  - id: ruff-format
+    types_or: [python, pyi]
+- repo: https://github.com/astral-sh/uv-pre-commit
+  rev: 0.11.12
+  hooks:
+  - id: uv-lock

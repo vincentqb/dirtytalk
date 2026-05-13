@@ -4,11 +4,11 @@ on:
   push:
     branches: [master]
     paths:
-      - 'wordlists/**'
-      - 'dirtytalk.py'
-      - '_dirtytalk.py'
-      - 'pyproject.toml'
-      - '.github/workflows/build.yml'
+    - wordlists/**
+    - dirtytalk.py
+    - _dirtytalk.py
+    - pyproject.toml
+    - .github/workflows/build.yml
   pull_request:
     branches: [master]
   workflow_dispatch: {}
@@ -20,29 +20,29 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
-      - uses: astral-sh/setup-uv@v6.3.1
-      - run: uv tool run pre-commit run --all-files --show-diff-on-failure
+    - uses: actions/checkout@v4.2.2
+    - uses: astral-sh/setup-uv@v6.3.1
+    - run: uv tool run pre-commit run --all-files --show-diff-on-failure
 
   build:
     needs: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
-      - uses: astral-sh/setup-uv@v6.3.1
-      - name: Install neovim (for :mkspell!)
-        run: sudo apt-get update && sudo apt-get install -y neovim
-      - run: uv sync
-      - run: uv run dirtytalk build
-      - name: Commit build artifacts on push to master
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add programming.words programming.utf-8.spl
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "Rebuild wordlist + spell file [skip ci]"
-            git push
-          fi
+    - uses: actions/checkout@v4.2.2
+    - uses: astral-sh/setup-uv@v6.3.1
+    - name: Install neovim (for :mkspell!)
+      run: sudo apt-get update && sudo apt-get install -y neovim
+    - run: uv sync
+    - run: uv run dirtytalk build
+    - name: Commit build artifacts on push to master
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      run: |
+        git config user.name  "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add programming.words programming.utf-8.spl
+        if git diff --cached --quiet; then
+          echo "No changes to commit."
+        else
+          git commit -m "Rebuild wordlist + spell file [skip ci]"
+          git push
+        fi
