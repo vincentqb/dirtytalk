@@ -9,11 +9,12 @@ compiled spell file as a release artifact you can drop into your editor.
 ## What this is
 
 - `wordlists/*.words` — per-topic source lists (acronyms, kubernetes, python,
-  unix, etc.). Updated daily by CI from upstream sources (Wikipedia,
-  cpython glossary, kubernetes openapi spec, …).
+  unix, etc.). Currently checked in as captured from upstream + PR #45.
+  Refresh from live sources will return in a Python rewrite (see ROADMAP
+  below).
 - `programming.words` — all wordlists concatenated.
 - `programming.utf-8.spl` — neovim/vim binary spell file, compiled from
-  `programming.words` via `:mkspell!`.
+  `programming.words` via `:mkspell!`. Rebuilt by CI on every push.
 
 ## Use it in (neo)vim
 
@@ -32,27 +33,33 @@ set spelllang=en,programming
 set spell
 ```
 
-That's it. No plugin, no `:DirtytalkUpdate`. The CI keeps the published
-`.spl` fresh on a daily schedule.
+That's it. No plugin, no `:DirtytalkUpdate`. CI rebuilds the published
+`.spl` on every push.
 
 ## Build locally
 
 ```sh
-make refresh   # re-scrape wordlists/ from upstream sources (needs curl, jq)
-make build     # combine into programming.words and programming.utf-8.spl
-make all       # both
+make build     # combine wordlists/ into programming.words and .spl
 make clean
 ```
 
-`make build` only needs `nvim`. `make refresh` needs `curl` and `jq` and
-talks to the internet.
+`make build` only needs `nvim`. The `make refresh` step (re-scraping
+upstream sources via `scripts/update-*`) is currently broken because
+several of those upstream URLs/formats have changed — see ROADMAP.
+
+## ROADMAP
+
+- [x] Strip vim plugin layer; build via CI.
+- [ ] Rewrite the per-source generators in Python (one file per source,
+      one `build.py` driver). Replaces the bash + jq + Docker pipeline.
+      Will fix the broken sources and re-enable a daily refresh.
+- [ ] Publish the `.spl` as a GitHub Release artifact too.
 
 ## Adding a new wordlist source
 
-Drop a script at `scripts/update-<topic>` following the pattern of the
-existing ones (`source common.sh`, fetch a URL, pipe through `emit_words`).
-The CI's `make refresh` step will pick it up automatically; the next CI
-run produces an updated `.spl`.
+Until the Python rewrite, just edit `wordlists/<topic>.words` directly
+(plain text, one word per line). After the rewrite, you'll add a
+`generators/<topic>.py` and the build will pick it up automatically.
 
 ## License
 
