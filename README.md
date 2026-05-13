@@ -1,138 +1,63 @@
-vim-dirtytalk: spellcheck dictionary for programmers 📖
-=======================================================
+# dirtytalk
 
-This (neo)vim plugin is a dynamically updateable spellcheck dictionary, to be
-used in conjunction with Vim's native spell checking feature. It is meant to
-aid with writing technical documentation (such as project's READMEs, runbooks,
-code comments, etc.), by providing you with a list of commonly used
-programming-related words, to supplement Vim's built-in English word list. Does
-your screen turn all red as soon as you `:set spell` on your project's README?
-You might want to give _vim-dirtytalk_ a try!
+A spellcheck dictionary for programmers — fork of [psliwka/vim-dirtytalk][upstream]
+with the vim plugin layer stripped out and a CI build that publishes the
+compiled spell file as a release artifact you can drop into your editor.
 
-Included word lists
--------------------
+[upstream]: https://github.com/psliwka/vim-dirtytalk
 
-Currently the plugin comes bundled with following word lists, compiled into one
-big list at installation time:
+## What this is
 
-| List name         | Example words                                  |
-|-------------------|------------------------------------------------|
-| `acronyms`        | API, JSON, PaaS                                |
-| `algorithms`      | quicksort, subtree, memoization                |
-| `brands`          | GitHub, AdSense, DynamoDB                      |
-| `comments`        | TODO, FIXME, XXX                               |
-| `cpp`             | const, enum, lvalue                            |
-| `docker`          | Dockerfile, cgroups, ENTRYPOINT                |
-| `file-extensions` | .js, .yaml, .lua                               |
-| `git`             | submodule, worktree, rebase                    |
-| `html`            | h1, iframe, fieldset                           |
-| `jargon`          | sanitizers, indistinguishability, microservice |
-| `kubernetes`      | ConfigMap, CSIDriver, HorizontalPodAutoscaler  |
-| `lorem-ipsum`     | Lorem, ipsum, dolor                            |
-| `nerd-fonts`      |  ,  , &nbsp;                                | <!-- a non-breaking space is needed to render the last symbol correctly on GitHub -->
-| `names`           | WannaCry, PuTTY, Merkle                        |
-| `prometheus`      | PromQL, Alertmanager, Pushgateway              |
-| `python`          | docstring, iterable, awaitable                 |
-| `unix`            | SIGTERM, chroot, grep                          |
-| `versions`        | v1, v2, v3                                     |
+- `wordlists/*.words` — per-topic source lists (acronyms, kubernetes, python,
+  unix, etc.). Updated daily by CI from upstream sources (Wikipedia,
+  cpython glossary, kubernetes openapi spec, …).
+- `programming.words` — all wordlists concatenated.
+- `programming.utf-8.spl` — neovim/vim binary spell file, compiled from
+  `programming.words` via `:mkspell!`.
 
-You can disable lists you don't want to use. See the _customization_ section
-for details.
+## Use it in (neo)vim
 
-Installation
-------------
+Drop the precompiled spell file into your nvim spell directory:
 
-Install the plugin using your favorite plugin manager. Ensure that the
-`:DirtytalkUpdate` command is executed after install and update. Example for
-[vim-plug]:
-
-```vim
-Plug 'psliwka/vim-dirtytalk', { 'do': ':DirtytalkUpdate' }
+```sh
+mkdir -p ~/.config/nvim/spell
+curl -L -o ~/.config/nvim/spell/programming.utf-8.spl \
+  https://raw.githubusercontent.com/vincentqb/dirtytalk/master/programming.utf-8.spl
 ```
 
-Then include your freshly-compiled `programming` dictionary in your `spelllang`
-setting. Example:
+Then in your config:
 
 ```vim
 set spelllang=en,programming
+set spell
 ```
 
-Alternatively you can do both steps via your plugin manager. Example for
-[lazy.nvim]:
+That's it. No plugin, no `:DirtytalkUpdate`. The CI keeps the published
+`.spl` fresh on a daily schedule.
 
-```lua
-{
-    "psliwka/vim-dirtytalk",
-    build = ":DirtytalkUpdate",
-    config = function()
-        vim.opt.spelllang = { "en", "programming" }
-    end,
-}
+## Build locally
+
+```sh
+make refresh   # re-scrape wordlists/ from upstream sources (needs curl, jq)
+make build     # combine into programming.words and programming.utf-8.spl
+make all       # both
+make clean
 ```
 
-Usage
------
+`make build` only needs `nvim`. `make refresh` needs `curl` and `jq` and
+talks to the internet.
 
-Once installed, the plugin integrates seamlessly with Vim's native spell
-checking (see `:h spell` for details on how to use it). Make sure you've
-enabled spell checking with `:set spell`!
+## Adding a new wordlist source
 
-Customization
--------------
+Drop a script at `scripts/update-<topic>` following the pattern of the
+existing ones (`source common.sh`, fetch a URL, pipe through `emit_words`).
+The CI's `make refresh` step will pick it up automatically; the next CI
+run produces an updated `.spl`.
 
-To disable a word list, add it to `g:dirtytalk_blacklist` variable. Example:
+## License
 
-```vim
-let g:dirtytalk_blacklist=['lorem-ipsum']
-```
+MIT — see [LICENSE](LICENSE). Wordlists derived from upstream sources;
+see the credits section in [upstream's README][upstream-readme] for
+attribution.
 
-Remember to re-run `:DirtytalkUpdate` after changing the blacklist.
-
-Known issues
-------------
-
-* Nerd fonts symbols are marked as rare words, to exclude them from spell
-	suggestions (`z=` and friends). This is needed, because otherwise their large
-	amount grinds Vim's spell suggestions algorithm to a halt. As a side effect,
-	all nerd fonts symbols are highlighted with `SpellRare` group (but at least
-	not with `SpellBad`, as they would if they hadn't been included in the
-	wordlist at all). If it bothers you, you can disable highlighting rare words
-	entirely with `:highlight clear SpellRare` as a workaround.
-
-Contributing
-------------
-
-You are encouraged to submit new word lists and other improvements to this
-project. See [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-Credits
--------
-
-Created by [Piotr Śliwka](https://github.com/psliwka).
-
-Word lists were created by scraping various external sites and projects, listed
-below:
-
-* [Bjarne Stroustrup's homepage](https://www.stroustrup.com/)
-* [BusyBox](https://www.busybox.net/)
-* [Docker](https://docker.com)
-* [GNU coreutils](https://www.gnu.org/software/coreutils/)
-* [Kubernetes](https://kubernetes.io/)
-* [MDN](https://developer.mozilla.org/)
-* [Nerd Fonts](https://www.nerdfonts.com/)
-* [Python](https://www.python.org/)
-* [Simple Icons](https://simpleicons.org/)
-* [The Open Group Base Specifications](https://pubs.opengroup.org/onlinepubs/9699919799/)
-* [Wikipedia](https://en.wikipedia.org)
-* [file-extension-list](https://github.com/dyne/file-extension-list)
-* [vim-polyglot](https://github.com/sheerun/vim-polyglot)
-
-Many thanks to authors and contributors of these!
-
-License
--------
-
-[MIT](LICENSE)
-
-[vim-plug]: https://github.com/junegunn/vim-plug
-[lazy.nvim]: https://github.com/folke/lazy.nvim
+[upstream-readme]: https://github.com/psliwka/vim-dirtytalk#credits

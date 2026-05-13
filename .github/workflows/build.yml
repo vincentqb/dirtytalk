@@ -1,0 +1,45 @@
+name: Build wordlist + spell file
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'scripts/**'
+      - 'wordlists/**'
+      - '.github/workflows/build.yml'
+  schedule:
+    # Daily at 10:00 UTC — refresh wordlists from upstream sources.
+    - cron: '0 10 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install neovim (for :mkspell!)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y neovim jq curl
+
+      - name: Refresh wordlists from upstream sources
+        run: scripts/update-all
+
+      - name: Build programming.words and programming.utf-8.spl
+        run: make build
+
+      - name: Commit build artifacts back to master
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add wordlists/ programming.words programming.utf-8.spl
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Rebuild wordlist + spell file [skip ci]"
+            git push
+          fi
