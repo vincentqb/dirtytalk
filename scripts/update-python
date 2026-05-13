@@ -1,9 +1,0 @@
-#!/bin/bash
-source "$(dirname $0)/common.sh"
-
-emit_header "Python-related vocabulary"
-curl -s https://raw.githubusercontent.com/python/cpython/main/Doc/glossary.rst \
-  | grep '^   \w' \
-  | tr ' ' '\n' \
-  | grep '[a-zA-Z]' \
-  | emit_words

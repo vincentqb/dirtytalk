@@ -21,10 +21,10 @@ set spell
 ## Build locally
 
 ```sh
-make build    # combines wordlists/*.words into programming.utf-8.spl
+uv run dirtytalk build
 ```
 
-Requires `nvim`.
+Requires `uv` and `nvim` (for `:mkspell!`).
 
 ## License
 

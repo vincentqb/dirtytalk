@@ -1,32 +1,41 @@
-name: Build wordlist + spell file
+name: build
 
 on:
   push:
     branches: [master]
     paths:
       - 'wordlists/**'
-      - 'Makefile'
+      - 'dirtytalk.py'
+      - '_dirtytalk.py'
+      - 'pyproject.toml'
       - '.github/workflows/build.yml'
+  pull_request:
+    branches: [master]
   workflow_dispatch: {}
 
 permissions:
   contents: write
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
+      - uses: astral-sh/setup-uv@v6.3.1
+      - run: uv tool run pre-commit run --all-files --show-diff-on-failure
 
+  build:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: astral-sh/setup-uv@v6.3.1
       - name: Install neovim (for :mkspell!)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y neovim
-
-      - name: Build programming.words and programming.utf-8.spl
-        run: make build
-
-      - name: Commit build artifacts back to master
+        run: sudo apt-get update && sudo apt-get install -y neovim
+      - run: uv sync
+      - run: uv run dirtytalk build
+      - name: Commit build artifacts on push to master
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

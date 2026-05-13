@@ -1,7 +1,0 @@
-#!/bin/bash
-source "$(dirname $0)/common.sh"
-
-emit_header "Version numbers"
-echo v{0..99} \
-  | tr ' ' '\n' \
-  | emit_words
