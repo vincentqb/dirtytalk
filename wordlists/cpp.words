@@ -1,6 +1,3 @@
-# This file is generated automatically by `scripts/update-cpp`. Please do not edit it directly.
-
-# C++-related vocabulary
 #define
 #include
 .c
@@ -214,7 +211,7 @@ float
 floating-point
 for-statement
 free
-free()	
+free()
 free-standing
 friend
 front-end

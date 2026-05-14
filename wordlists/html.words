@@ -1,6 +1,3 @@
-# This file is generated automatically by `scripts/update-html`. Please do not edit it directly.
-
-# HTML tags
 a
 abbr
 acronym
@@ -48,6 +45,7 @@ footer
 form
 frame
 frameset
+geolocation
 h1
 h2
 h3
@@ -93,7 +91,6 @@ p
 param
 picture
 plaintext
-portal
 pre
 progress
 q
@@ -108,6 +105,7 @@ script
 search
 section
 select
+selectedcontent
 shadow
 slot
 small
