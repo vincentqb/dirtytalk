@@ -1,17 +1,16 @@
-# This file is generated automatically by `scripts/update-file-extensions`. Please do not edit it directly.
-
-# Common file extensions
 .1.ada
 .2.ada
 .3dm
 .3ds
 .3g2
 .3gp
+.3mf
 .7z
 .a
 .aac
 .aaf
 .aap
+.aar
 .abap
 .abc
 .abl
@@ -58,6 +57,7 @@
 .asm
 .asn
 .asp
+.aspx
 .at
 .atg
 .atl
@@ -66,6 +66,7 @@
 .avchd
 .ave
 .avi
+.avif
 .avsc
 .aw
 .awk
@@ -102,6 +103,7 @@
 .bones
 .boot
 .bpk
+.br
 .bsdl
 .bst
 .btm
@@ -117,6 +119,7 @@
 .cake
 .calendar
 .cap
+.car
 .cargo
 .carp
 .catalog
@@ -215,6 +218,7 @@
 .dart
 .dat
 .data
+.dav
 .db
 .dcd
 .dch
@@ -319,6 +323,7 @@
 .exw
 .eye
 .f
+.f3d
 .f77
 .f90
 .fal
@@ -362,6 +367,7 @@
 .fxml
 .g
 .gawk
+.gcode
 .gdmo
 .ged
 .gemspec
@@ -424,6 +430,8 @@
 .hdbs
 .hdl
 .heex
+.heic
+.heif
 .hex
 .hg
 .hgrc
@@ -548,6 +556,7 @@
 .jst
 .jsx
 .just
+.jxl
 .k
 .key
 .kix
@@ -614,7 +623,12 @@
 .lua
 .lxx
 .ly
+.lz
+.lz4
+.lzma
+.lzo
 .m
+.m2ts
 .m2v
 .m3u
 .m4
@@ -777,11 +791,13 @@
 .ogg
 .ogm
 .ogv
+.ogx
 .old
 .om
 .opal
 .opam
 .opencl
+.opus
 .or
 .ora
 .org
@@ -814,6 +830,9 @@
 .pgsql
 .ph
 .php
+.php3
+.php4
+.php5
 .phps
 .phpt
 .phtml
@@ -850,6 +869,7 @@
 .pp
 .ppd
 .ppt
+.pptx
 .pr
 .prawn
 .prc
@@ -863,12 +883,19 @@
 .properties
 .props
 .proto
+.prql
 .ps
+.ps1
+.ps1xml
 .psc
+.psc1
 .psd
+.psd1
 .psf
 .psgi
 .psm
+.psm1
+.psrc
 .pssc
 .pt
 .ptl
@@ -1065,6 +1092,8 @@
 .sst
 .st
 .star
+.step
+.stl
 .stm
 .story
 .storyboard
@@ -1163,6 +1192,7 @@
 .twig
 .txi
 .txt
+.txz
 .tyb
 .tyc
 .typ
@@ -1238,6 +1268,7 @@
 .whl
 .wixproj
 .wl
+.wll
 .wls
 .wlt
 .wlua
@@ -1268,6 +1299,7 @@
 .x
 .xacro
 .xaml
+.xba
 .xcf
 .xcodeproj
 .xdc
@@ -1277,6 +1309,7 @@
 .xin
 .xlf
 .xliff
+.xll
 .xls
 .xlsx
 .xm
@@ -1324,4 +1357,5 @@
 .zlog
 .zsh
 .zsql
+.zst
 .zu

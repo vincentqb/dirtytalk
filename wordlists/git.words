@@ -1,9 +1,7 @@
-# This file is generated automatically by `scripts/update-git`. Please do not edit it directly.
-
-# Git-related vocabulary
 DAG
 Git
 HEAD
+ID
 SCM
 SHA-1
 also
@@ -25,7 +23,7 @@ commit
 commit-graph
 commit-ish
 committish
-concept,
+concept
 core
 dangling
 database
@@ -80,7 +78,6 @@ resolve
 revision
 rewind
 shallow
-special
 stash
 submodule
 superproject
@@ -88,6 +85,7 @@ symref
 system
 tag
 topic
+trailer
 tree
 tree-ish
 treeish
