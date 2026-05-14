@@ -10,6 +10,9 @@ on:
     - .github/workflows/build.yml
   pull_request:
     branches: [master]
+  schedule:
+  # Daily at 10:00 UTC — refresh wordlists from upstream sources.
+  - cron: 0 10 * * *
   workflow_dispatch:
     inputs:
       refresh:
@@ -38,13 +41,13 @@ jobs:
     - name: Install neovim (for :mkspell!)
       run: sudo apt-get update && sudo apt-get install -y neovim
     - run: uv sync
-    - if: ${{ inputs.refresh }}
+    - if: ${{ inputs.refresh || github.event_name == 'schedule' }}
       run: uv run dirtytalk fetch
     - run: uv run dirtytalk build
     - name: Commit build artifacts back to master
       if: |
         github.ref == 'refs/heads/master' &&
-        (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule')
       run: |
         git config user.name  "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

@@ -13,6 +13,9 @@ from argparse import ArgumentParser
 from collections.abc import Callable, Iterable
 from pathlib import Path
 
+import yaml
+from bs4 import BeautifulSoup
+
 
 def __dir__():
     return __all__
@@ -41,6 +44,35 @@ def source(name: str) -> Callable[[Callable[[], Iterable[str]]], Callable[[], It
         return fn
 
     return deco
+
+
+# Curated tails the legacy bash scripts appended after each scraped source.
+# Kept inline so the whole pipeline lives in one file.
+ACRONYMS_EXTRA: tuple[str, ...] = (
+    "3DES", "APIs", "APK", "AXFR", "BSSID", "CAs", "CCMP", "CSPRNG", "CVSS",
+    "CWE", "DMARC", "DNSSEC", "DSGVO", "ECB", "EDNS", "GC", "GDPR", "GNSS",
+    "HKLM", "HMAC", "HSTS", "HTA", "IAM", "IBAN", "IBANs", "IDN", "JWT",
+    "KDF", "LTS", "MD5", "MITM", "MTAs", "OCSP", "OSINT", "PEM", "R2",
+    "RC4", "RCE", "SNI", "SSRF", "TKIP", "TOTP", "U2F", "XHR",
+)  # fmt: skip
+
+BRANDS_EXTRA: tuple[str, ...] = (
+    "Acronis", "AMD64", "AngularJS", "Artifactory", "BitLocker", "Chromebook",
+    "CloudFormation", "CloudTrail", "Coverity", "Cppcheck", "Defender",
+    "DigiCert", "Duqu", "Entra", "FortiGate", "FOSSGIS", "Foxit", "GitLab's",
+    "GlobalSign", "Hoek", "iPhones", "jsoup", "Karaf", "Log4j", "Lync",
+    "Mailchimp", "MailHog", "Nessus", "Netgear", "Nvidia", "Office", "OkHttp",
+    "OneDrive's", "OpenPhish", "OSTIF", "PKZIP", "PowerDNS", "PrivateLink",
+    "Protection", "PRTG", "PSFTPd", "reCAPTCHA", "reCAPTCHA's", "Semgrep",
+    "SendGrid", "Sophos", "Splashtop", "Threema's", "TinyMCE", "TopAccess",
+    "Vertica", "Wazuh", "YubiKey", "YubiKey's", "YubiKeys",
+)  # fmt: skip
+
+UNIX_EXTRA: tuple[str, ...] = ("cron", "gpg", "podman", "rsync", "sudo", "tcpdump")
+
+# Names of wordlists/<name>.words files that are hand-curated. `fetch` leaves
+# them alone; `build` still concatenates them with everything else.
+STATIC_WORDLISTS: frozenset[str] = frozenset({"comments", "jargon", "names"})
 
 
 # --- fetchers ---------------------------------------------------------------
@@ -118,6 +150,110 @@ def lorem_ipsum() -> list[str]:
         "culpa qui officia deserunt mollit anim id est laborum."
     )
     return [w.strip(".,").lower() for w in text.split()]
+
+
+@source("acronyms")
+def acronyms() -> list[str]:
+    """Common IT acronyms from the Wikipedia list page, plus a curated tail."""
+    soup = BeautifulSoup(
+        http_get("https://en.wikipedia.org/wiki/List_of_computing_and_IT_abbreviations"),
+        "html.parser",
+    )
+    out = [text for a in soup.select("li > a[title]") if re.fullmatch(r"[A-Za-z0-9.]+", text := a.get_text().strip())]
+    out.extend(ACRONYMS_EXTRA)
+    return out
+
+
+@source("algorithms")
+def algorithms() -> list[str]:
+    """Algorithm and data-structure names from two Wikipedia list pages."""
+    out: list[str] = []
+    for url in (
+        "https://en.wikipedia.org/wiki/List_of_algorithms",
+        "https://en.wikipedia.org/wiki/List_of_data_structures",
+    ):
+        soup = BeautifulSoup(http_get(url), "html.parser")
+        for a in soup.select(".mw-parser-output li > a[title]"):
+            text = re.sub(r"\(.*\)$", "", a.get_text()).strip()
+            out.extend(text.split())
+    return out
+
+
+@source("brands")
+def brands() -> list[str]:
+    """Popular IT-related brand names from simple-icons + curated tail."""
+    data = json.loads(
+        http_get("https://raw.githubusercontent.com/simple-icons/simple-icons/master/data/simple-icons.json")
+    )
+    # Schema: a flat list of {"title": "...", ...} (was {"icons": [...]} pre-2024).
+    out = [w for icon in data for w in str(icon.get("title", "")).split() if re.search(r"[A-Za-z]", w)]
+    out.extend(BRANDS_EXTRA)
+    return out
+
+
+@source("cpp")
+def cpp_glossary() -> list[str]:
+    """C++-related vocabulary from Stroustrup's glossary."""
+    soup = BeautifulSoup(http_get("https://www.stroustrup.com/glossary.html"), "html.parser")
+    return [w for b in soup.find_all("b") for w in b.get_text().split() if re.search(r"[A-Za-z]", w)]
+
+
+@source("docker")
+def docker_glossary() -> list[str]:
+    """Docker-related vocabulary from docker/docs glossary.yaml top-level keys."""
+    data = yaml.safe_load(http_get("https://raw.githubusercontent.com/docker/docs/main/data/glossary.yaml"))
+    return list(data.keys()) if isinstance(data, dict) else []
+
+
+@source("html")
+def html_tags() -> list[str]:
+    """HTML tag names from MDN's element index."""
+    soup = BeautifulSoup(http_get("https://developer.mozilla.org/en-US/docs/Web/HTML/Element"), "html.parser")
+    return [
+        m.group(1)
+        for code in soup.find_all("code")
+        if (m := re.fullmatch(r"<([a-zA-Z][a-zA-Z0-9]*)>", code.get_text().strip()))
+    ]
+
+
+@source("nerd-fonts")
+def nerd_fonts() -> list[str]:
+    """Nerd Fonts codepoints, marked '/?' so :mkspell! treats them as rare."""
+    soup = BeautifulSoup(http_get("https://www.nerdfonts.com/cheat-sheet"), "html.parser")
+    script = soup.find("script")
+    if script is None or not script.string:
+        return []
+    # The cheat-sheet embeds an array of '"abcd",' tuples — the 4-hex codepoint.
+    return [chr(int(cp, 16)) + "/?" for cp in re.findall(r'"([0-9a-f]{4})",', script.string)]
+
+
+@source("prometheus")
+def prometheus_glossary() -> list[str]:
+    """Prometheus-related vocabulary from the upstream glossary markdown."""
+    md = http_get("https://raw.githubusercontent.com/prometheus/docs/main/docs/introduction/glossary.md")
+    md = "\n".join(md.splitlines()[2:])  # drop front-matter
+    md = re.sub(r"\]\([^)]*\)", "]", md)  # strip [text](url) link targets
+    return [w for w in re.split(r"[^A-Za-z]+", md) if len(w) > 1]
+
+
+@source("unix")
+def unix_commands() -> list[str]:
+    """UNIX command names from coreutils + POSIX utilities."""
+    out: list[str] = []
+    readme = http_get("https://git.savannah.gnu.org/cgit/coreutils.git/plain/README")
+    if m := re.search(
+        r"The programs that can be built with this package are:\s*\n(.+?)\n\s*See the file NEWS",
+        readme,
+        re.DOTALL,
+    ):
+        out.extend(re.findall(r"[a-z][a-z0-9]+", m.group(1)))
+    soup = BeautifulSoup(
+        http_get("https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/idx/utilities.html"),
+        "html.parser",
+    )
+    out.extend(text for a in soup.find_all("a") if re.fullmatch(r"[a-z][a-z0-9]*", text := a.get_text().strip()))
+    out.extend(UNIX_EXTRA)
+    return out
 
 
 @source("versions")
