@@ -6,12 +6,17 @@ on:
     paths:
     - wordlists/**
     - dirtytalk.py
-    - _dirtytalk.py
     - pyproject.toml
     - .github/workflows/build.yml
   pull_request:
     branches: [master]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      refresh:
+        description: Run "dirtytalk fetch" to refresh wordlists from upstream sources before building.
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -33,13 +38,15 @@ jobs:
     - name: Install neovim (for :mkspell!)
       run: sudo apt-get update && sudo apt-get install -y neovim
     - run: uv sync
+    - if: ${{ inputs.refresh }}
+      run: uv run dirtytalk fetch
     - run: uv run dirtytalk build
     - name: Commit build artifacts on push to master
       if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       run: |
         git config user.name  "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add programming.words programming.utf-8.spl
+        git add wordlists programming.words programming.utf-8.spl
         if git diff --cached --quiet; then
           echo "No changes to commit."
         else
