@@ -11,12 +11,12 @@ on:
   pull_request:
     branches: [master]
   schedule:
-  # Daily at 10:00 UTC — refresh wordlists from upstream sources.
-  - cron: 0 10 * * *
+  # Yearly: January 1st at 10:00 UTC.
+  - cron: 0 10 1 1 *
   workflow_dispatch:
     inputs:
       refresh:
-        description: Run "dirtytalk fetch" to refresh wordlists from upstream sources before building.
+        description: Run "dirtytalk fetch" to refresh wordlists from upstream sources.
         required: false
         default: false
         type: boolean
@@ -38,8 +38,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4.2.2
     - uses: astral-sh/setup-uv@v6.3.1
-    - name: Install neovim (for :mkspell!)
-      run: sudo apt-get update && sudo apt-get install -y neovim
     - run: uv sync
     - if: ${{ inputs.refresh || github.event_name == 'schedule' }}
       run: uv run dirtytalk fetch
@@ -51,10 +49,10 @@ jobs:
       run: |
         git config user.name  "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add wordlists programming.words programming.utf-8.spl
+        git add wordlists programming.words
         if git diff --cached --quiet; then
           echo "No changes to commit."
         else
-          git commit -m "Rebuild wordlist + spell file [skip ci]"
+          git commit -m "Rebuild wordlist [skip ci]"
           git push
         fi

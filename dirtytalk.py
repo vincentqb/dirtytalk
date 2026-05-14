@@ -5,8 +5,6 @@ __all__ = ["SOURCES", "build", "dirtytalk_from_args", "fetch", "fetch_all"]
 
 import json
 import re
-import shutil
-import subprocess
 import sys
 import urllib.request
 from argparse import ArgumentParser
@@ -309,10 +307,11 @@ def fetch_all(wordlists_dir: Path) -> dict[str, BaseException | None]:
 
 
 def build(wordlists_dir: Path, output_dir: Path) -> Path:
-    """Concatenate wordlists/*.words into programming.words and compile to .spl.
+    """Concatenate wordlists/*.words into a single programming.words file.
 
-    Returns the path to the compiled programming.utf-8.spl file. Requires
-    `nvim` (or `vim`) on PATH for :mkspell!.
+    Returns the path to programming.words. Compilation to a binary .spl is
+    intentionally left to the consumer (different vim/nvim versions disagree
+    on the .spl format), with a one-time `:mkspell!` at install.
     """
     wordlists_dir = Path(wordlists_dir).resolve()
     output_dir = Path(output_dir).resolve()
@@ -324,31 +323,7 @@ def build(wordlists_dir: Path, output_dir: Path) -> Path:
 
     words_path = output_dir / "programming.words"
     words_path.write_bytes(b"".join(p.read_bytes() for p in sources))
-
-    editor = shutil.which("nvim") or shutil.which("vim")
-    if not editor:
-        raise RuntimeError("nvim or vim is required for :mkspell!")
-
-    # :mkspell! <output-basename> <input> writes <output-basename>.<encoding>.spl
-    subprocess.run(
-        [
-            editor,
-            "--headless",
-            "--clean",
-            "-c",
-            f"mkspell! {output_dir / 'programming'} {words_path}",
-            "-c",
-            "qa",
-        ],
-        check=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-
-    spl_path = output_dir / "programming.utf-8.spl"
-    if not spl_path.exists():
-        raise RuntimeError(f"{editor} :mkspell! did not produce {spl_path}")
-    return spl_path
+    return words_path
 
 
 # --- CLI --------------------------------------------------------------------
