@@ -22,7 +22,7 @@ test = [
 ]
 
 [project.scripts]
-dirtytalk = "_dirtytalk:dirtytalk_from_args"
+dirtytalk = "dirtytalk:dirtytalk_from_args"
 
 [project.urls]
 "Homepage" = "https://github.com/vincentqb/dirtytalk/"
@@ -35,7 +35,7 @@ show_missing = false
 source = ["."]
 
 [tool.hatch.build]
-only-include = ["dirtytalk.py", "_dirtytalk.py"]
+only-include = ["dirtytalk.py"]
 
 [tool.hatch.version]
 source = "vcs"
