@@ -41,8 +41,10 @@ jobs:
     - if: ${{ inputs.refresh }}
       run: uv run dirtytalk fetch
     - run: uv run dirtytalk build
-    - name: Commit build artifacts on push to master
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    - name: Commit build artifacts back to master
+      if: |
+        github.ref == 'refs/heads/master' &&
+        (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
       run: |
         git config user.name  "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
