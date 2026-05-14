@@ -39,3 +39,6 @@ only-include = ["dirtytalk.py"]
 
 [tool.hatch.version]
 source = "vcs"
+
+[tool.ruff]
+line-length = 120
